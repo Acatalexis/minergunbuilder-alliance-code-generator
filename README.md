@@ -7,11 +7,13 @@ xrobau.
 
 ## How To Use It:
 **Mobile:**
+
 1: enable split screening with your browser(PIP/Floating-Window also works) and MinerGunBuilder app.
 
 2: Go to https://acatalexis.github.io/minergunbuilder-alliance-code-generator/ and input your alliance invite code and just press generate.
 
 **PC:**
+
 1: Just open the site https://acatalexis.github.io/minergunbuilder-alliance-code-generator/
 
 
