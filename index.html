@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MinerGunBuilder • Alliance Code Generator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+
+body { font-family: 'Inter', system-ui; }
+.title-font { font-family: 'Space Grotesk'; }
+.code-font { font-family: monospace; }
+
+.glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); }
+.glow { box-shadow: 0 0 40px -10px rgb(0 255 157); }
+
+.card-hover { transition: 0.25s; }
+.card-hover:hover { transform: translateY(-2px); }
+
+.active-code {
+    border: 2px solid #00ff9d !important;
+    background: rgba(0,255,157,0.1);
+}
+
+.btn-anim {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.1s ease;
+}
+.btn-anim:active { transform: scale(0.96); }
+
+.btn-anim::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: all 0.4s;
+}
+.btn-anim:active::after { left: 100%; }
+</style>
+</head>
+
+<body class="bg-[#0a0a0a] text-white min-h-screen overflow-x-hidden">
+
+<nav class="border-b border-white/10 bg-black/60 backdrop-blur-xl sticky top-0 z-50">
+<div class="max-w-screen-2xl mx-auto px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+    <div class="flex items-center gap-3">
+        <img src="https://cdn.discordapp.com/attachments/1228919842720059406/1496229500185481337/app_icon.png?ex=69e91fcf&is=69e7ce4f&hm=bdc285e4090ce1faa900b3b2848414fb8bfde86029797345657caaa814005601"
+        class="w-9 h-9 rounded-none">
+        <div>
+            <h1 class="title-font text-2xl sm:text-3xl font-semibold leading-tight">MinerGunBuilder</h1>
+            <div class="text-xs sm:text-sm text-emerald-400">Alliance Codes</div>
+        </div>
+    </div>
+
+    <a href="https://gist.github.com/xrobau/00f5f0365917ab95fa4f5d91a328317c"
+    target="_blank"
+    class="btn-anim bg-emerald-400 text-black px-4 py-2 rounded-full text-xs sm:text-sm font-semibold w-full sm:w-auto text-center">
+        Original JS
+    </a>
+
+</div>
+</nav>
+
+<div class="max-w-screen-2xl mx-auto px-6 py-10 flex flex-col lg:flex-row gap-10">
+
+<div class="lg:w-96">
+
+<div class="glass border border-white/10 rounded-3xl p-8 glow">
+
+<h2 class="text-3xl title-font mb-2">Generate Codes</h2>
+
+<div class="flex items-center gap-2 text-sm text-zinc-400 mb-4">
+<span>Your invitation code</span>
+<span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">64 hex chars</span>
+</div>
+
+<input id="invitation-input" type="text"
+value="e0f135ef961d6d82d35346b9a578d028e6bbee3cc02f020b5d8a8421483597b8"
+class="code-font w-full bg-black/60 border border-white/20 rounded-3xl px-6 py-5 mb-6 outline-none">
+
+<button onclick="generateBatch()"
+class="btn-anim w-full bg-gradient-to-r from-emerald-400 to-cyan-400 text-black font-bold text-lg py-4 rounded-3xl">
+⚡ GENERATE 50
+</button>
+
+</div>
+
+<div class="mt-6 text-xs text-zinc-500">
+Built as a simplified UI around the original JS generator.
+</div>
+
+</div>
+
+<div class="flex-1">
+<div id="results-container" class="min-h-[400px]"></div>
+</div>
+
+</div>
+
+<script>
+let currentBatch = [];
+let currentIndex = 0;
+let currentActiveEl = null;
+
+function getEven(f){var e=[8,12,15,2,14,3,5,1,7,13,11,9,10,4,6,0];return e[parseInt(f,16)];}
+function getOdd(f){var o=[15,7,3,5,13,6,14,8,0,11,12,10,1,9,4,2];return o[parseInt(f,16)];}
+function getRand(){var r="";for(var i=0;i<32;i++){r+=Math.floor(Math.random()*16).toString(16);}return r;}
+
+function generateCode(ic){
+var m=[1,6,0,7,"e",8,"f","d","b",5,2,"c",3,"a",9,4];
+let base=ic.split("").map(a=>m[parseInt(a,16)]).join("");
+var rand=getRand(), r=rand.split("").reverse();
+
+for(var i=0;i<32;i++){
+var f=r[i];
+rand+= (i%2)?getEven(f).toString(16):getOdd(f).toString(16);
+}
+
+var code="";
+for(var i=0;i<64;i++){code+=base[i]+rand[i];}
+return code;
+}
+
+function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+    }
+
+    return new Promise((resolve, reject) => {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-999999px";
+        textarea.style.top = "-999999px";
+        document.body.appendChild(textarea);
+
+        textarea.focus();
+        textarea.select();
+
+        try {
+            const ok = document.execCommand("copy");
+            document.body.removeChild(textarea);
+            ok ? resolve() : reject();
+        } catch (err) {
+            document.body.removeChild(textarea);
+            reject(err);
+        }
+    });
+}
+
+function toast(msg){
+    const t=document.createElement("div");
+    t.textContent=msg;
+    t.style.cssText="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#00ff9d;color:#000;padding:10px 18px;border-radius:999px;font-weight:600;z-index:9999;";
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(),1500);
+}
+
+function highlight(el){
+    if(currentActiveEl) currentActiveEl.classList.remove("active-code");
+    currentActiveEl = el;
+    el.classList.add("active-code");
+}
+
+function copyNext(){
+    if(currentBatch.length===0) return;
+
+    const btn=document.getElementById("copy-next-btn");
+    if(currentIndex>=50) return;
+
+    const code=currentBatch[currentIndex];
+    const el=document.getElementById("code-"+currentIndex);
+
+    copyToClipboard(code).then(()=>{
+        highlight(el);
+        currentIndex++;
+        btn.innerText=`⏭ Copy Next (${currentIndex}/50)`;
+
+        if(currentIndex===50){
+            btn.innerText="⏳ Regenerating...";
+            btn.disabled=true;
+
+            setTimeout(()=>{
+                generateBatch();
+                btn.disabled=false;
+                btn.innerText="⏭ Copy Next (0/50)";
+            },1000);
+        }
+
+        toast("Copied ✅");
+    }).catch(()=>toast("Copy failed ❌"));
+}
+
+function copyAll(){
+    copyToClipboard(currentBatch.join("\n"))
+    .then(()=>toast("All copied ✅"))
+    .catch(()=>toast("Copy failed ❌"));
+}
+
+function generateBatch(){
+    const ic=document.getElementById("invitation-input").value.trim();
+
+    currentBatch=[];
+    currentIndex=0;
+    currentActiveEl=null;
+
+    const container=document.getElementById("results-container");
+    container.innerHTML="";
+
+    const header=document.createElement("div");
+    header.className="mb-6 flex gap-3 flex-wrap";
+
+    header.innerHTML=`
+    <button id="copy-next-btn" class="btn-anim bg-emerald-400 text-black px-5 py-3 rounded-2xl font-bold">
+    ⏭ Copy Next (0/50)
+    </button>
+
+    <button id="copy-all-btn" class="btn-anim bg-white/10 px-5 py-3 rounded-2xl">
+    📋 Copy All
+    </button>
+    `;
+
+    container.appendChild(header);
+
+    document.getElementById("copy-next-btn").onclick = copyNext;
+    document.getElementById("copy-all-btn").onclick = copyAll;
+
+    const grid=document.createElement("div");
+    grid.className="grid gap-3";
+
+    for(let i=0;i<50;i++){
+        const code=generateCode(ic);
+        currentBatch.push(code);
+
+        const div=document.createElement("div");
+        div.id="code-"+i;
+        div.className="glass p-4 rounded-2xl code-font card-hover flex gap-3 overflow-hidden";
+
+        div.innerHTML = `
+        <span class="text-zinc-500 w-8 flex-shrink-0">${i+1}.</span>
+        <span class="break-all flex-1">${code}</span>
+        `;
+
+        grid.appendChild(div);
+    }
+
+    container.appendChild(grid);
+}
+
+document.addEventListener("keydown",(e)=>{
+    if(e.code==="Space"){
+        e.preventDefault();
+        copyNext();
+    }
+});
+</script>
+
+</body>
+</html>
